@@ -3,3 +3,6 @@ This is a simple proof of concept reverse shell written in PowerShell and python
 
 The server adds custom header to every response with base64 encoded command that then executes from powershell client.
 Have fun
+
+# Thanks
+Big thanks to @_frego_ for his improvements and ideas.
