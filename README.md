@@ -5,4 +5,4 @@ The server adds custom header to every response with base64 encoded command that
 Have fun
 
 # Thanks
-Big thanks to @_frego_ for his improvements and ideas.
+Big thanks to [@frego](https://twitter.com/_frego_) for his improvements and ideas.
